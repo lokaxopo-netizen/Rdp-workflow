@@ -1,7 +1,7 @@
 name: RDP
-‎‎on:
+‎on:
 ‎  workflow_dispatch:
-‎‎jobs:
+‎jobs:
 ‎  rdp:
 ‎    runs-on: ubuntu-latest
 ‎    timeout-minutes: 300
@@ -12,8 +12,8 @@ name: RDP
 ‎          sudo apt install -y xrdp xfce4 xfce4-terminal
 ‎          sudo systemctl enable xrdp
 ‎          echo 'runner:1234' | sudo chpasswd
-‎‎      - name: Start xrdp
+‎      - name: Start xrdp
 ‎        run: sudo systemctl start xrdp
-‎     - name: Create tunnel and keep alive for 5 hours
+‎      - name: Create tunnel and keep alive for 5 hours
 ‎        run: |
 ‎          timeout 18000 bash -c 'ssh -R 3389:localhost:3389 serveo.net -o StrictHostKeyChecking=no -o ServerAliveInterval=60'
