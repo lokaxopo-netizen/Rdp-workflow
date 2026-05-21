@@ -1,19 +1,24 @@
-‎name: RDP
+name: Ubuntu Desktop
+‎
 ‎on:
 ‎  workflow_dispatch:
+‎
 ‎jobs:
-‎  rdp:
+‎  build:
 ‎    runs-on: ubuntu-latest
-‎    timeout-minutes: 300
+‎    
 ‎    steps:
-‎      - name: Install xrdp and xfce
-‎        run: |
-          sudo apt update
-          sudo apt install -y xrdp xfce4 xfce4-terminal
-          sudo systemctl enable xrdp
-          echo 'runner:1234'| sudo chpasswd
-      - name: Start xrdp
-‎        run: sudo systemctl start xrdp
-‎      - name: Create tunnel and keep alive for 5 hours
-‎        run: |
- timeout 18000 bash -c 'ssh -R 3389:localhost:3389 serveo.net -o StrictHostKeyChecking=no -o ServerAliveInterval=60'
+‎    - name: Update packages
+‎      run: sudo apt update
+‎
+‎    - name: Install XFCE and XRDP
+‎      run: sudo apt install -y xfce4 xfce4-terminal xrdp
+‎
+‎    - name: Enable XRDP service
+‎      run: sudo systemctl enable xrdp
+‎
+‎    - name: Set password for runner
+‎      run: echo 'runner:1234' | sudo chpasswd
+‎
+‎    - name: Show IP
+‎      run: hostname -I
