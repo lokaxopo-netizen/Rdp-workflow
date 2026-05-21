@@ -7,15 +7,12 @@ name: Ubuntu Desktop
 ‎‎    steps:
 ‎    - name: Update packages
 ‎      run: sudo apt update
-‎
 ‎    - name: Install XFCE and XRDP
 ‎      run: sudo apt install -y xfce4 xfce4-terminal xrdp
-‎
 ‎    - name: Enable XRDP service
 ‎      run: sudo systemctl enable xrdp
-‎
 ‎    - name: Set password for runner
 ‎      run: echo 'runner:1234' | sudo chpasswd
-‎
-‎    - name: Show IP
-‎      run: hostname -I
+‎   
+- name: Show IP
+‎- run: hostname -I
