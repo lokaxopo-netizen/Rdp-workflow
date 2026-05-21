@@ -1,8 +1,7 @@
 name: Ubuntu Desktop
 ‎on:
 ‎  workflow_dispatch:
-‎
-‎jobs:
+‎‎jobs:
 ‎  build:
 ‎    runs-on: ubuntu-latest
 ‎    
