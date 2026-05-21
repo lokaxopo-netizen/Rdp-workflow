@@ -8,11 +8,11 @@
 ‎    steps:
 ‎      - name: Install xrdp and xfce
 ‎        run: |
-  sudo apt update
-  sudo apt install -y xrdp xfce4 xfce4-terminal
-  sudo systemctl enable xrdp
-  echo 'runner:1234'| sudo chpasswd
- - name: Start xrdp
+          sudo apt update
+          sudo apt install -y xrdp xfce4 xfce4-terminal
+          sudo systemctl enable xrdp
+          echo 'runner:1234'| sudo chpasswd
+      - name: Start xrdp
 ‎        run: sudo systemctl start xrdp
 ‎      - name: Create tunnel and keep alive for 5 hours
 ‎        run: |
