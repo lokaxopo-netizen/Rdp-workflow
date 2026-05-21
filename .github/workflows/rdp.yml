@@ -1,5 +1,4 @@
 name: Ubuntu Desktop
-‎
 ‎on:
 ‎  workflow_dispatch:
 ‎
