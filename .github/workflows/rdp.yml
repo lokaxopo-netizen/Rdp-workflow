@@ -1,18 +1,24 @@
-name: Ubuntu Desktop
-‎on:
-‎  workflow_dispatch:
-‎‎jobs:
-‎  build:
-‎    runs-on: ubuntu-latest
-‎‎    steps:
-‎    - name: Update packages
-‎      run: sudo apt update
-‎    - name: Install XFCE and XRDP
-‎      run: sudo apt install -y xfce4 xfce4-terminal xrdp
-‎    - name: Enable XRDP service
-‎      run: sudo systemctl enable xrdp
-‎    - name: Set password for runner
-‎      run: echo 'runner:1234' | sudo chpasswd
-‎   
-- name: Show IP
-‎- run: hostname -I
+  name: Ubuntu Desktop
+  ‎on:
+  workflow_dispatch:
+  ‎jobs:
+  build:
+  runs-on: ubuntu-latest
+  steps:
+  - name: Update packages
+  run: sudo apt update
+  -name: Install XFCE and XRDP
+
+  run: sudo apt install -y xfce4 xfce4-terminal xrdp
+  -name: Enable XRDP service
+
+  run: sudo systemctl enable xrdp
+  -name: Set password for runner
+      
+  -name: Set password for runner
+  run: echo 'runner:1234' | sudo chpasswd
+  ‎-name: Show IP  run: hostname-I
+
+
+
+
