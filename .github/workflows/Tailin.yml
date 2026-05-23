@@ -1,36 +1,61 @@
-name: RDP-Tailscale
+name: Windows RDP via Tailscale
+
 on:
   workflow_dispatch:
 
 jobs:
-  rdp:
+  build:
     runs-on: windows-latest
     timeout-minutes: 360
     
     steps:
-      - name: Enable RDP
-        run: |
-          net user runner P@ssw0rd!2026 /add
-          net localgroup administrators runner /add
-          Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
-          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          Write-Host "RDP enabled successfully"
+    - name: Configure RDP
+      shell: powershell
+      run: |
+        # Create user
+        net user runner P@ssw0rd!2026 /add
+        net localgroup administrators runner /add
+        
+        # Enable RDP
+        Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        
+        Write-Host "RDP enabled. User: runner / Pass: P@ssw0rd!2026"
 
-      - name: Install Tailscale
-        run: |
-          choco install tailscale -y
-          Start-Service Tailscale
-          Start-Sleep 5
+    - name: Install Tailscale
+      shell: powershell
+      run: |
+        choco install tailscale -y --no-progress
+        Start-Service Tailscale
+        Start-Sleep 20
+        
+        if (Test-Path "C:\Program Files\Tailscale\tailscale.exe") {
+          Write-Host "Tailscale installed successfully"
+        } else {
+          throw "Tailscale installation failed"
+        }
 
-      - name: Connect to Tailscale
-        run: |
-          tailscale up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --hostname=gh-runner --accept-routes
-          Start-Sleep 10
-          Write-Host "Tailscale IP:"
-          tailscale ip -4
+    - name: Connect to Tailscale
+      shell: powershell
+      run: |
+        $tailscaleExe = "C:\Program Files\Tailscale\tailscale.exe"
+        
+        # Connect using authkey from secrets
+        & $tailscaleExe up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --hostname=gh-runner-${{ github.run_id }} --accept-routes --ssh
+        
+        Start-Sleep 15
+        
+        # Show IP
+        $ip = & $tailscaleExe ip -4
+        Write-Host "=========================="
+        Write-Host "Tailscale IP: $ip"
+        Write-Host "RDP to: $ip"
+        Write-Host "User: runner"
+        Write-Host "Pass: P@ssw0rd!2026"
+        Write-Host "=========================="
 
-      - name: Keep Alive
-        run: |
-          Write-Host "Connected! Use the IP above"
-          Write-Host "RDP Login: runner / P@ssw0rd!2026"
-          Start-Sleep 21600
+    - name: Keep Alive
+      shell: powershell
+      run: |
+        Write-Host "Runner will stay alive for 6 hours"
+        Start-Sleep 21600
