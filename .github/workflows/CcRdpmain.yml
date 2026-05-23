@@ -7,12 +7,25 @@ jobs:
     steps:
       - name: Update packages
         run: sudo apt update
+      
       - name: Install XFCE and XRDP
         run: sudo apt install -y xfce4 xfce4-terminal xrdp
+      
       - name: Enable XRDP service
-        run: sudo systemctl enable xrdp
+        run: |
+          sudo systemctl enable xrdp
+          sudo systemctl start xrdp
+      
       - name: Set password for runner
         run: echo 'runner:1234' | sudo chpasswd
-      - name: Show IP
-        run: hostname -I
-
+      
+      - name: Install Tailscale
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscale up --authkey ${{ secrets.TAILSCALE_AUTHKEY }} --ssh
+      
+      - name: Show Tailscale IP
+        run: tailscale ip -4
+      
+      - name: Keep alive
+        run: sleep 6h
