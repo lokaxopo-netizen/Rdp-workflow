@@ -1,26 +1,41 @@
 name: RDP-Tailscale
-on: workflow_dispatch
+
+on:
+  workflow_dispatch:
+
 jobs:
   rdp:
     runs-on: windows-latest
     timeout-minutes: 360
+    
     steps:
       - name: Enable RDP
         run: |
+          net user runner 1234 /add
+          net localgroup administrators runner /add
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          net user runner 1234
-          net localgroup administrators runner /add
+          Write-Host "RDP enabled successfully"
 
-      - name: Install and Connect Tailscale
+      - name: Install Tailscale
         run: |
           choco install tailscale -y
           Start-Service Tailscale
           Start-Sleep 5
-          tailscale up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --hostname=gh-runner
+          Write-Host "Tailscale installed"
+
+      - name: Connect to Tailscale
+        run: |
+          tailscale up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --hostname=gh-runner --accept-routes --ssh
           Start-Sleep 10
+          Write-Host "Connected to Tailscale"
           Write-Host "Tailscale IP:"
           tailscale ip -4
 
-      - name: Keep alive
-        run: Start-Sleep 21600
+      - name: Keep Alive
+        run: |
+          Write-Host "=================================="
+          Write-Host "Connected! Copy the IP above"
+          Write-Host "RDP: IP with user runner / pass 1234"
+          Write-Host "=================================="
+          Start-Sleep 21600
