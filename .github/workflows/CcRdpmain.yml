@@ -1,31 +1,50 @@
-name: Ubuntu Desktop
+name: Windows RDP via Tailscale
+
 on:
   workflow_dispatch:
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    timeout-minutes: 360
+    
     steps:
-      - name: Update packages
-        run: sudo apt update
-      
-      - name: Install XFCE and XRDP
-        run: sudo apt install -y xfce4 xfce4-terminal xrdp
-      
-      - name: Enable XRDP service
-        run: |
-          sudo systemctl enable xrdp
-          sudo systemctl start xrdp
-      
-      - name: Set password for runner
-        run: echo 'runner:1234' | sudo chpasswd
-      
-      - name: Install Tailscale
-        run: |
-          curl -fsSL https://tailscale.com/install.sh | sh
-          sudo tailscale up --authkey ${{ secrets.TAILSCALE_AUTHKEY }} --ssh
-      
-      - name: Show Tailscale IP
-        run: tailscale ip -4
-      
-      - name: Keep alive
-        run: sleep 6h
+    - name: Configure RDP
+      shell: powershell
+      run: |
+        net user runner P@ssw0rd!2026 /add
+        net localgroup administrators runner /add
+        Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Write-Host "RDP enabled"
+
+    - name: Install Tailscale
+      shell: powershell
+      run: |
+        choco install tailscale -y --no-progress
+        Start-Service Tailscale
+        Start-Sleep 20
+
+    - name: Connect to Tailscale
+      shell: powershell
+      run: |
+        $tailscaleExe = "C:\Program Files\Tailscale\tailscale.exe"
+        & $tailscaleExe up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --hostname=gh-runner-${{ github.run_id }} --accept-routes
+        Start-Sleep 15
+        $ip = & $tailscaleExe ip -4
+        if ($ip) {
+          Write-Host "=========================="
+          Write-Host "Tailscale IP: $ip"
+          Write-Host "RDP to: $ip"
+          Write-Host "User: runner"
+          Write-Host "Pass: P@ssw0rd!2026"
+          Write-Host "=========================="
+        } else {
+          throw "Failed to get Tailscale IP. Check authkey."
+        }
+
+    - name: Keep Alive
+      shell: powershell
+      run: |
+        Write-Host "Runner will stay alive for 6 hours"
+        Start-Sleep 21600
