@@ -1,50 +1,27 @@
-name: Windows RDP via Tailscale
-
-on:
-  workflow_dispatch:
+صح، اnname: Tailscale RDP
+on: workflow_dispatch
 
 jobs:
-  build:
+  rdp:
     runs-on: windows-latest
-    timeout-minutes: 360
-    
     steps:
-    - name: Configure RDP
-      shell: powershell
-      run: |
-        net user runner P@ssw0rd!2026 /add
-        net localgroup administrators runner /add
-        Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections" -Value 0
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-        Write-Host "RDP enabled"
+      - name: Enable RDP
+        run: |
+          Set-ItemProperty "HKLM:\System\CurrentControlSet\Control\Terminal Server" fDenyTSConnections 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+          net user runneradmin P@ssw0rd!2026
 
-    - name: Install Tailscale
-      shell: powershell
-      run: |
-        choco install tailscale -y --no-progress
-        Start-Service Tailscale
-        Start-Sleep 20
+      - name: Install Tailscale
+        run: |
+          choco install tailscale -y --no-progress
 
-    - name: Connect to Tailscale
-      shell: powershell
-      run: |
-        $tailscaleExe = "C:\Program Files\Tailscale\tailscale.exe"
-        & $tailscaleExe up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --hostname=gh-runner-${{ github.run_id }} --accept-routes
-        Start-Sleep 15
-        $ip = & $tailscaleExe ip -4
-        if ($ip) {
-          Write-Host "=========================="
-          Write-Host "Tailscale IP: $ip"
-          Write-Host "RDP to: $ip"
-          Write-Host "User: runner"
-          Write-Host "Pass: P@ssw0rd!2026"
-          Write-Host "=========================="
-        } else {
-          throw "Failed to get Tailscale IP. Check authkey."
-        }
+      - name: Connect to Tailscale
+        run: |
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=${{ secrets.TAILSCALE_AUTHKEY }} --hostname=gh-runner
 
-    - name: Keep Alive
-      shell: powershell
-      run: |
-        Write-Host "Runner will stay alive for 6 hours"
-        Start-Sleep 21600
+      - name: Show IP
+        run: |
+          & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+
+      - name: Keep Alive 6h
+        run: Start-Sleep 21600
