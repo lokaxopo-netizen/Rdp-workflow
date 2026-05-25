@@ -9,7 +9,7 @@ jobs:
         run: |
           Set-ItemProperty "HKLM:\System\CurrentControlSet\Control\Terminal Server" fDenyTSConnections 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          net user runneradmin P@ssw0rd!2026
+          net user runneradmin Admin12345
 
       - name: Install Tailscale
         run: |
