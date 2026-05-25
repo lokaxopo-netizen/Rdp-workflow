@@ -1,4 +1,4 @@
-صح، اnname: Tailscale RDP
+name: Tailscale RDP
 on: workflow_dispatch
 
 jobs:
